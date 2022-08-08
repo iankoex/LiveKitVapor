@@ -48,7 +48,7 @@ public struct ParticipantInfo: Codable, Content, Equatable {
 
 extension ParticipantInfo {
     public struct Permission: Codable, Equatable {
-        init(
+        public init(
             canSubscribe: Bool,
             canPublishTracks: Bool,
             canPublishData: Bool,

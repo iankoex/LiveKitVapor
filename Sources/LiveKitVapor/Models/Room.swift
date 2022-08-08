@@ -53,6 +53,16 @@ extension Room {
             case maxParticipants = "max_participants"
         }
         
+        public init(
+            name: String,
+            timeout: Int,
+            maxParticipants: Int
+        ) {
+            self.name = name
+            self.timeout = timeout
+            self.maxParticipants = maxParticipants
+        }
+        
         /// Name of the room
         public var name: String
         
@@ -77,7 +87,7 @@ extension Room {
     /// Used in DeleteRoom, ListParticipants, GetParticipant, RemoveParticipant, MutePublishedTrack
     /// UpdateParticipant, UpdateSubscriptions
     public struct Details: Codable, Content {
-        enum CodingKeys: String, CodingKey {
+        public enum CodingKeys: String, CodingKey {
             case roomName = "room"
             case participantID = "identity"
             case trackSID = "track_sid"
@@ -88,8 +98,28 @@ extension Room {
             case subscribe = "subscribe"
         }
         
+        public init(
+            roomName: String,
+            participantID: String? = nil,
+            trackSID: String? = nil,
+            isMuted: Bool? = nil,
+            participantPermissions: ParticipantInfo.Permission? = nil,
+            metadata: String? = nil,
+            trackSIDs: [String]? = nil,
+            subscribe: Bool? = nil
+        ) {
+            self.roomName = roomName
+            self.participantID = participantID
+            self.trackSID = trackSID
+            self.isMuted = isMuted
+            self.participantPermissions = participantPermissions
+            self.metadata = metadata
+            self.trackSIDs = trackSIDs
+            self.subscribe = subscribe
+        }
+        
         /// name of the room
-        public  var roomName: String
+        public var roomName: String
         
         /// identity of the participant.
         public var participantID: String?
@@ -125,6 +155,18 @@ extension Room {
             case data = "data"
             case kind = "kind"
             case destinationSIDs = "destination_sids"
+        }
+        
+        public init(
+            roomName: String,
+            data: Data,
+            kind: SendData.SendType,
+            destinationSIDs: [String]
+        ) {
+            self.roomName = roomName
+            self.data = data
+            self.kind = kind
+            self.destinationSIDs = destinationSIDs
         }
         
         public var roomName: String
