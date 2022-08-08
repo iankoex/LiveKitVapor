@@ -53,6 +53,16 @@ let videoGrant = VideoGrant(
 let token = try LiveKit.shared.generateToken(videoGrant: videoGrant)
 return token
 ```
+```swift
+// Use your own api-key and api-secret
+// in your configure
+public func configure(_ app: Application) throws {
+    // Other Configurations
+    LiveKit.shared.apiKey = "myOtherDevKey"
+    LiveKit.shared.secret = "my-256-bit-secret"
+}
+```
+
 LiveKit Server APIs. For more information refer to the [APIs docs]().
 
 | LiveKit Server APIs (twirp)  | LiveKitVapor  |
@@ -96,6 +106,7 @@ Test with an issue:
 
 ## To Do
 - [ ] Make codable structs mirror those of LiveKit swift client [sdk](https://github.com/livekit/client-sdk-swift.git).
+- [ ] Enums for track type and quality.
 - [ ] Test LiveKitVapor on Linux.
 - [ ] Something else.
 

@@ -246,4 +246,3 @@ extension LiveKit {
         return response.status
     }
 }
-
