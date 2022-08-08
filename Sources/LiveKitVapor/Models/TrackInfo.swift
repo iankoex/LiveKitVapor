@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TrackInfo: Codable {
+struct TrackInfo: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case sid = "sid"
         case trackType = "type"
@@ -65,7 +65,7 @@ extension TrackInfo {
 }
 
 extension TrackInfo {
-    struct Layer: Codable {
+    struct Layer: Codable, Equatable {
         var quality: String // ?? Enum?
         var width: Int
         var height: Int
@@ -75,7 +75,7 @@ extension TrackInfo {
 }
 
 extension TrackInfo {
-    struct Codec: Codable {
+    struct Codec: Codable, Equatable {
         enum CodingKeys: String, CodingKey {
             case mimeType = "mime_type"
             case mid = "mid"

@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 
-struct Room: Codable, Content {
+public struct Room: Codable, Content {
     enum CodingKeys: String, CodingKey {
         case sid = "sid"
         case name = "name"
@@ -46,7 +46,7 @@ extension Room {
 }
 
 extension Room {
-    struct Create: Codable, Content {
+    public struct Create: Codable, Content {
         enum CodingKeys: String, CodingKey {
             case name = "name"
             case timeout = "empty_timeout"
@@ -67,8 +67,8 @@ extension Room {
 extension Room {
     /// LiveKit server API returns it this way
     /// why? I dont know
-    struct Rooms: Codable, Content {
-        var rooms: [Room]
+    public struct Rooms: Codable, Content {
+        public var rooms: [Room]
     }
 }
 
@@ -76,7 +76,7 @@ extension Room {
 extension Room {
     /// Used in DeleteRoom, ListParticipants, GetParticipant, RemoveParticipant, MutePublishedTrack
     /// UpdateParticipant, UpdateSubscriptions
-    struct Details: Codable, Content {
+    public struct Details: Codable, Content {
         enum CodingKeys: String, CodingKey {
             case roomName = "room"
             case participantID = "identity"
@@ -119,7 +119,7 @@ extension Room {
 
 extension Room {
     /// Used in SendData
-    struct SendData: Codable, Content {
+    public struct SendData: Codable, Content {
         enum CodingKeys: String, CodingKey {
             case roomName = "room"
             case data = "data"

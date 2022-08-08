@@ -1,19 +1,28 @@
 import Foundation
 import Vapor
 
-final class LiveKit {
-    static var shared = LiveKit()
-    // Meant to be used in vapor so
-//    most of the functions use live kit swift client sdk
-    var apiKey: String = "devkey"
-    var secret: String = "secret"
-    var baseTwirpURL: URL = URL(string: "http://localhost:7880/twirp/livekit.RoomService")!
+final public class LiveKit {
+    static public var shared = LiveKit()
     
+    public var apiKey: String = "devkey"
+    public var secret: String = "secret"
+    public var baseTwirpURL: URL = URL(string: "http://localhost:7880/twirp/livekit.RoomService")!
     
 }
 
 extension LiveKit {
-    func createRoom(
+    public func status(_ req: Request) async throws -> HTTPStatus {
+        let prePostURL: URL = baseTwirpURL.deletingLastPathComponent()
+        let postURL: URL = prePostURL.appendingPathComponent("livekit")
+        let someURI = URI(string: postURL.absoluteString)
+        let response = try await req.client.post(someURI) { req in
+            req.headers.contentType = .json
+            try req.content.encode(["":""])
+        }
+        return response.status
+    }
+    
+    public func createRoom(
         roomName: String,
         timeout: Int = 300,
         maxParticipants: Int = 10,
@@ -23,7 +32,7 @@ extension LiveKit {
         return try await createRoom(roomCreate, on: req)
     }
     
-    func createRoom(
+    public func createRoom(
         _ roomCreate: Room.Create,
         on req: Request
     ) async throws -> Room {
@@ -44,7 +53,7 @@ extension LiveKit {
         return room
     }
     
-    func getAllRooms(on req: Request) async throws -> Room.Rooms {
+    public func getAllRooms(on req: Request) async throws -> Room.Rooms {
         let postURL: URL = baseTwirpURL.appendingPathComponent("ListRooms")
         let someURI = URI(string: postURL.absoluteString)
         let token = try generateRoomToken()
@@ -62,7 +71,7 @@ extension LiveKit {
         return rooms
     }
     
-    func deleteRoom(_ roomName: String, on req: Request) async throws -> HTTPStatus {
+    public func deleteRoom(_ roomName: String, on req: Request) async throws -> HTTPStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("DeleteRoom")
         let someURI = URI(string: postURL.absoluteString)
         let token = try generateRoomToken()
@@ -77,7 +86,7 @@ extension LiveKit {
         return response.status
     }
     
-    func updateRoomMetadata(_ roomName: String, metadata: String, on req: Request) async throws -> HTTPStatus {
+    public func updateRoomMetadata(_ roomName: String, metadata: String, on req: Request) async throws -> HTTPStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("UpdateRoomMetadata")
         let someURI = URI(string: postURL.absoluteString)
         let token = try generateRoomToken(roomName)
@@ -92,7 +101,7 @@ extension LiveKit {
         return response.status
     }
     
-    func sendData(_ sendData: Room.SendData, on req: Request) async throws -> HTTPStatus {
+    public func sendData(_ sendData: Room.SendData, on req: Request) async throws -> HTTPStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("SendData")
         let someURI = URI(string: postURL.absoluteString)
         let token = try generateRoomToken(sendData.roomName)
@@ -106,7 +115,7 @@ extension LiveKit {
         return response.status
     }
     
-    func getAllParticipants(_ roomName: String, on req: Request) async throws -> ParticipantInfo.Participants {
+    public func getAllParticipants(_ roomName: String, on req: Request) async throws -> ParticipantInfo.Participants {
         let postURL: URL = baseTwirpURL.appendingPathComponent("ListParticipants")
         let someURI = URI(string: postURL.absoluteString)
         let token = try generateRoomToken(roomName)
@@ -125,7 +134,7 @@ extension LiveKit {
         return participants
     }
     
-    func getParticipant(_ roomName: String, participantID: String, on req: Request) async throws -> ParticipantInfo {
+    public func getParticipant(_ roomName: String, participantID: String, on req: Request) async throws -> ParticipantInfo {
         let postURL: URL = baseTwirpURL.appendingPathComponent("GetParticipant")
         let someURI = URI(string: postURL.absoluteString)
         let token = try generateRoomToken(roomName)
@@ -144,7 +153,7 @@ extension LiveKit {
         return participant
     }
     
-    func removeParticipant(_ roomName: String, participantID: String, on req: Request) async throws -> HTTPStatus {
+    public func removeParticipant(_ roomName: String, participantID: String, on req: Request) async throws -> HTTPStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("RemoveParticipant")
         let someURI = URI(string: postURL.absoluteString)
         let token = try generateRoomToken(roomName)
@@ -159,7 +168,7 @@ extension LiveKit {
         return response.status
     }
     
-    func muteTrack(
+    public func muteTrack(
         _ roomName: String,
         participantID: String,
         trackSID: String,
@@ -185,7 +194,7 @@ extension LiveKit {
         return response.status
     }
     
-    func updateParticipant(
+    public func updateParticipant(
         _ roomName: String,
         participantID: String,
         metadata: String? = nil,
@@ -211,7 +220,7 @@ extension LiveKit {
         return response.status
     }
     
-    func updateSubscriptions(
+    public func updateSubscriptions(
         _ roomName: String,
         participantID: String,
         trackSIDs: [String],

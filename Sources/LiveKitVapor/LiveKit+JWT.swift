@@ -9,7 +9,7 @@ import Foundation
 import JWT
 
 extension LiveKit {
-    func generateToken(
+    public func generateToken(
         participantID: String = "Server Helper",
         expiryDate: Date = Date(timeIntervalSinceNow: 5 * 60),
         videoGrant: VideoGrant = VideoGrant(roomName: "myRoom", canJoinRoom: true),
@@ -34,7 +34,7 @@ extension LiveKit {
         return token
     }
     
-    func generateRoomToken(_ roomName: String = "") throws -> String {
+    public func generateRoomToken(_ roomName: String = "") throws -> String {
         let jwtSigner: JWTSigner = .hs256(key: secret)
         let videoGrant: VideoGrant = VideoGrant(
             roomName: roomName,

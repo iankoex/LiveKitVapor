@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "LiveKitVapor",
     platforms: [
-        .macOS(.v10_15),
+        .macOS(.v12),
         .iOS(.v13),
         .tvOS(.v13),
         .watchOS(.v6)
@@ -33,6 +33,9 @@ let package = Package(
             ]),
         .testTarget(
             name: "LiveKitVaporTests",
-            dependencies: ["LiveKitVapor"]),
+            dependencies: [
+                .target(name: "LiveKitVapor"),
+                .product(name: "XCTVapor", package: "vapor"),
+            ]),
     ]
 )

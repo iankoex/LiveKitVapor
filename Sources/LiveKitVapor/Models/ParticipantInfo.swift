@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 
-struct ParticipantInfo: Codable, Content {
+public struct ParticipantInfo: Codable, Content, Equatable {
     enum CodingKeys: String, CodingKey {
         case sid = "sid"
         case participantID = "identity"
@@ -48,7 +48,7 @@ struct ParticipantInfo: Codable, Content {
 }
 
 extension ParticipantInfo {
-    struct Permission: Codable {
+    public struct Permission: Codable, Equatable {
         enum CodingKeys: String, CodingKey {
             case canSubscribe = "can_subscribe"
             case canPublishTracks = "can_publish"
@@ -73,7 +73,7 @@ extension ParticipantInfo {
 }
 
 extension ParticipantInfo {
-    struct Participants: Codable, Content {
+    public struct Participants: Codable, Content {
         var participants: [ParticipantInfo]
     }
 }
