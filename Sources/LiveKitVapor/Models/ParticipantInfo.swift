@@ -23,32 +23,45 @@ public struct ParticipantInfo: Codable, Content, Equatable {
         case isPublisher = "is_publisher"
     }
     
-    var sid: String
+    public var sid: String
     
-    var participantID: String
+    public var participantID: String
     
-    var state: String
+    public var state: String
     
-    var tracks: [TrackInfo]
+    public var tracks: [TrackInfo]
     
-    var metadata: String
+    public var metadata: String
     
-    var joinedAt: String
+    public var joinedAt: String
     
-    var participantName: String
+    public var participantName: String
     
-    var version: Int
+    public var version: Int
     
-    var permissions: Permission
+    public var permissions: Permission
     
-    var region: String // ?? Enum?
+    public var region: String // ?? Enum?
     
-    var isPublisher: Bool
-    
+    public var isPublisher: Bool
 }
 
 extension ParticipantInfo {
     public struct Permission: Codable, Equatable {
+        init(
+            canSubscribe: Bool,
+            canPublishTracks: Bool,
+            canPublishData: Bool,
+            isHidden: Bool,
+            isRecording: Bool
+        ) {
+            self.canSubscribe = canSubscribe
+            self.canPublishTracks = canPublishTracks
+            self.canPublishData = canPublishData
+            self.isHidden = isHidden
+            self.isRecording = isRecording
+        }
+        
         enum CodingKeys: String, CodingKey {
             case canSubscribe = "can_subscribe"
             case canPublishTracks = "can_publish"
@@ -58,23 +71,23 @@ extension ParticipantInfo {
         }
          
         /// Allow participant to subscribe to other tracks in the room
-        var canSubscribe: Bool
+        public var canSubscribe: Bool
         
         /// Allow participant to publish new tracks to room
-        var canPublishTracks: Bool
+        public var canPublishTracks: Bool
         
         /// Allow participant to publish data to room
-        var canPublishData: Bool
+        public var canPublishData: Bool
         
-        var isHidden: Bool
+        public var isHidden: Bool
         
-        var isRecording: Bool
+        public var isRecording: Bool
     }
 }
 
 extension ParticipantInfo {
     public struct Participants: Codable, Content {
-        var participants: [ParticipantInfo]
+        public var participants: [ParticipantInfo]
     }
 }
 

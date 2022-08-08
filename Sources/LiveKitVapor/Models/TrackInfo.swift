@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct TrackInfo: Codable, Equatable {
+public struct TrackInfo: Codable, Equatable {
     enum CodingKeys: String, CodingKey {
         case sid = "sid"
         case trackType = "type"
@@ -25,67 +25,67 @@ struct TrackInfo: Codable, Equatable {
     }
     
     /// Server generated identifier
-    var sid: String
+    public var sid: String
     
     /// audio or video
-    var trackType: String   // Should Be enum
+    public var trackType: String   // Should Be enum
     
     /// Name given at publish time
-    var name: String
+    public var name: String
     
     /// true if track has been muted by the publisher
-    var isMuted: Bool
+    public var isMuted: Bool
     
     /// Original width of video (unset for audio)
-    var width: Int
+    public var width: Int
     
     /// Original height of video (unset for audio)
-    var height: Int
+    public var height: Int
     
     /// true if track is simulcasted
-    var isSimulcast: Bool
+    public  var isSimulcast: Bool
     
-    var isDTXDisabled: Bool
+    public var isDTXDisabled: Bool
     
-    var source: String // ?? Enum?
+    public var source: String // ?? Enum?
     
-    var layers: [Layer]
+    public var layers: [Layer]
     
-    var mimeType: String
+    public var mimeType: String
     
-    var mid: String
+    public var mid: String
     
-    var codecs: [Codec]
+    public var codecs: [Codec]
 }
 
 extension TrackInfo {
-    struct Tracks: Codable {
-        var tracks: [TrackInfo]
+    public struct Tracks: Codable {
+        public var tracks: [TrackInfo]
     }
 }
 
 extension TrackInfo {
-    struct Layer: Codable, Equatable {
-        var quality: String // ?? Enum?
-        var width: Int
-        var height: Int
-        var bitrate: Int
-        var ssrc: Int
+    public struct Layer: Codable, Equatable {
+        public var quality: String // ?? Enum?
+        public var width: Int
+        public var height: Int
+        public var bitrate: Int
+        public var ssrc: Int
     }
 }
 
 extension TrackInfo {
-    struct Codec: Codable, Equatable {
+    public struct Codec: Codable, Equatable {
         enum CodingKeys: String, CodingKey {
             case mimeType = "mime_type"
             case mid = "mid"
             case cid = "cid"
             case layers = "layers"
         }
-        var mimeType: String
-        var mid: String
-        var cid: String
-        var layers: [Layer]
+        public var mimeType: String
+        public var mid: String
+        public var cid: String
+        public var layers: [Layer]
     }
 }
 

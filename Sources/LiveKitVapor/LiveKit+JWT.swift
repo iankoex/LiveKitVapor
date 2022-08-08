@@ -41,7 +41,7 @@ extension LiveKit {
             canCreateRoom: true,
             canListRooms: true,
             isRoomAdmin: true,
-            isParticipantHidden: false // set to true in production
+            isParticipantHidden: true // set to true in production
         )
         let date: Date = .now
         let notBefore = Date(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate.rounded(.up))

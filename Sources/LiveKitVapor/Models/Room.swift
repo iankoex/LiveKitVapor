@@ -22,26 +22,26 @@ public struct Room: Codable, Content {
         case isBeingRecorded = "active_recording"
     }
     
-    var sid: String
-    var name: String
-    var emptyTimeout: Int
-    var maxParticipants: Int
-    var creationTime: String
-    var turnPassword: String
-    var enabledCodecs: [Room.Codec]
-    var metadata: String
-    var participantsCount: Int
-    var isBeingRecorded: Bool
+    public var sid: String
+    public var name: String
+    public var emptyTimeout: Int
+    public var maxParticipants: Int
+    public var creationTime: String
+    public var turnPassword: String
+    public var enabledCodecs: [Room.Codec]
+    public var metadata: String
+    public var participantsCount: Int
+    public var isBeingRecorded: Bool
 }
 
 extension Room {
-    struct Codec: Codable {
+    public struct Codec: Codable {
         enum CodingKeys: String, CodingKey {
             case mime = "mime"
             case fmtpLine = "fmtp_line"
         }
-        var mime: String
-        var fmtpLine: String
+        public var mime: String
+        public var fmtpLine: String
     }
 }
 
@@ -54,13 +54,13 @@ extension Room {
         }
         
         /// Name of the room
-        var name: String
+        public var name: String
         
         /// Number of seconds to keep the room open if no one joins
-        var timeout: Int
+        public var timeout: Int
         
         ///  Maximum number of participants that can be in the room
-        var maxParticipants: Int
+        public var maxParticipants: Int
     }
 }
 
@@ -89,31 +89,31 @@ extension Room {
         }
         
         /// name of the room
-        var roomName: String
+        public  var roomName: String
         
         /// identity of the participant.
-        var participantID: String?
+        public var participantID: String?
         
         /// sid of the track to mute
-        var trackSID: String?
+        public var trackSID: String?
         
         /// set to true to mute, false to unmute
-        var isMuted: Bool?
+        public var isMuted: Bool?
         
         /// set to update the participant's permissions
-        var participantPermissions: ParticipantInfo.Permission?
+        public var participantPermissions: ParticipantInfo.Permission?
         
         /// used to update user's metadata in UpdateParticipant
         /// used to update Room's metadata in UpdateRoomMetadata
-        var metadata: String?
+        public var metadata: String?
         
         /// list of sids of tracks
         /// Used in UpdateSubscriptions
-        var trackSIDs: [String]?
+        public var trackSIDs: [String]?
         
         /// set to true to subscribe, false to unsubscribe from tracks
         /// Used in UpdateSubscriptions
-        var subscribe: Bool?
+        public var subscribe: Bool?
     }
 }
 
@@ -127,17 +127,17 @@ extension Room {
             case destinationSIDs = "destination_sids"
         }
         
-        var roomName: String
+        public var roomName: String
         
-        var data: Data
+        public var data: Data
         
         /// Reliable or Lossy
-        var kind: SendData.SendType
+        public var kind: SendData.SendType
         
         /// list of participant sids to send to, sends to everyone when left blank
-        var destinationSIDs: [String]
+        public var destinationSIDs: [String]
         
-        enum SendType: Codable {
+        public enum SendType: Codable {
             case reliable
             case lossy
         }
