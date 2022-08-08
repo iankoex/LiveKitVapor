@@ -34,7 +34,7 @@ extension LiveKit {
         return token
     }
     
-    public func generateRoomToken(_ roomName: String = "") throws -> String {
+    internal func generateRoomToken(_ roomName: String = "") throws -> String {
         let jwtSigner: JWTSigner = .hs256(key: secret)
         let videoGrant: VideoGrant = VideoGrant(
             roomName: roomName,

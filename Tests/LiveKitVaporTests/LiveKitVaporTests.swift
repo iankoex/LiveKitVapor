@@ -183,6 +183,10 @@ final class AppTests: XCTestCase {
         // no test yet
     }
     
+    func testRemoveParticipant() async throws {
+        // no tests yet
+    }
+    
     func testZRemoveParticipant() async throws {
         // the z is to make sure this is the last test.
         let participants = try await liveKit.getAllParticipants("TestRoom", on: req)
