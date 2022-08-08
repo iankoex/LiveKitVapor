@@ -1,0 +1,43 @@
+//
+//  File.swift
+//  
+//
+//  Created by Ian on 08/08/2022.
+//
+
+import Foundation
+import JWT
+
+struct LKJTWPayload: JWTPayload {
+    enum CodingKeys: String, CodingKey {
+        case expiration = "exp"
+        case notBefore = "nbf"
+        case participantID = "sub"
+        case apiKey = "iss"
+        case videoGrant = "video"
+        case metadata = "metadata"
+    }
+    
+    /// Expiration time of token
+    var expiration: ExpirationClaim
+    
+    /// Start time that the token becomes valid
+    var notBefore: NotBeforeClaim
+    
+    /// API key used to issue this token
+    var apiKey: String
+    
+    /// Unique identity for the participant
+    var participantID: String
+    
+    /// Video grant, including room permissions
+    var videoGrant: VideoGrant
+ 
+    /// Participant metadata
+    var metadata: String? = nil
+    
+    func verify(using signer: JWTSigner) throws {
+        try self.expiration.verifyNotExpired()
+    }
+}
+
