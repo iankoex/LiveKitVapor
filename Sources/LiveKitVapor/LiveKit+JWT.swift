@@ -10,7 +10,8 @@ import JWT
 
 extension LiveKit {
     public func generateToken(
-        participantID: String = "Server Helper",
+        participantID: String = UUID().uuidString,
+        participantName: String = "Server Helper",
         expiryDate: Date = Date(timeIntervalSinceNow: 5 * 60),
         videoGrant: VideoGrant = VideoGrant(roomName: "myRoom", canJoinRoom: true),
         metadata: String? = nil
@@ -27,6 +28,7 @@ extension LiveKit {
             notBefore: notBeforeClaim,
             apiKey: apiKey,
             participantID: participantID,
+            participantName: participantName,
             videoGrant: videoGrant,
             metadata: metadata
         )
@@ -54,7 +56,8 @@ extension LiveKit {
             expiration: expiryClaim,
             notBefore: notBeforeClaim,
             apiKey: apiKey,
-            participantID: "Server Helper",
+            participantID: UUID().uuidString,
+            participantName: "Server Helper",
             videoGrant: videoGrant,
             metadata: "I am the your helper on the server side."
         )

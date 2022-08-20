@@ -13,6 +13,7 @@ struct LKJTWPayload: JWTPayload {
         case expiration = "exp"
         case notBefore = "nbf"
         case participantID = "sub"
+        case participantName = "name"
         case apiKey = "iss"
         case videoGrant = "video"
         case metadata = "metadata"
@@ -30,6 +31,9 @@ struct LKJTWPayload: JWTPayload {
     /// Unique identity for the participant
     var participantID: String
     
+    /// The name of the participant
+    var participantName: String
+    
     /// Video grant, including room permissions
     var videoGrant: VideoGrant
  
@@ -40,4 +44,3 @@ struct LKJTWPayload: JWTPayload {
         try self.expiration.verifyNotExpired()
     }
 }
-
