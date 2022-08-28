@@ -17,7 +17,7 @@ extension LiveKit {
         metadata: String? = nil
     ) throws -> String {
         let jwtSigner: JWTSigner = .hs256(key: secret)
-        let date: Date = .now
+        let date: Date = Date()
         let notBefore = Date(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate.rounded(.up))
         let notBeforeClaim = NotBeforeClaim(value: notBefore)
         let expiry = Date(timeIntervalSinceReferenceDate: expiryDate.timeIntervalSinceReferenceDate.rounded(.up))
@@ -43,9 +43,9 @@ extension LiveKit {
             canCreateRoom: true,
             canListRooms: true,
             isRoomAdmin: true,
-            isParticipantHidden: true // set to true in production
+            isParticipantHidden: true
         )
-        let date: Date = .now
+        let date: Date = Date()
         let notBefore = Date(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate.rounded(.up))
         let notBeforeClaim = NotBeforeClaim(value: notBefore)
         let expiryDate: Date = Date(timeIntervalSinceNow: 60)
