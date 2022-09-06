@@ -13,6 +13,7 @@ public struct VideoGrant: Codable {
         canJoinRoom: Bool? = nil,
         isRoomAdmin: Bool? = nil,
         canRecordRoom: Bool? = nil,
+        canPublish: Bool? = nil,
         canPublishData: Bool? = nil,
         canSubscribe: Bool = true,
         isParticipantHidden: Bool? = nil,
@@ -48,6 +49,9 @@ public struct VideoGrant: Codable {
     /// Permissions to use Egress service
     public var canRecordRoom: Bool? = nil
     
+    /// Allow participant to publish tracks
+    public var canPublish: Bool? = nil
+    
     /// Allow participant to publish data to the room
     public var canPublishData: Bool? = nil
     
@@ -67,6 +71,7 @@ public struct VideoGrant: Codable {
         case canJoinRoom = "roomJoin"
         case isRoomAdmin = "roomAdmin"
         case canRecordRoom = "roomRecord"
+        case canPublish = "canPublish"
         case canPublishData = "canPublishData"
         case canSubscribe = "canSubscribe"
         case isParticipantHidden = "hidden"
