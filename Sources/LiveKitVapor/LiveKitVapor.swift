@@ -1,24 +1,29 @@
 import Foundation
-import Vapor
+import AsyncHTTPClient
+import JWTKit
+import NIOHTTP1
+import NIOFoundationCompat
 
-final public class LiveKit {
+final public class LiveKit: Sendable {
     static public var shared = LiveKit()
     
     public var apiKey: String = "devkey"
     public var secret: String = "secret"
     public var baseTwirpURL: URL = URL(string: "http://localhost:7880/twirp/livekit.RoomService")!
-    
+    let jwtKeyCollection = JWTKeyCollection()
 }
 
+extension HTTPResponseStatus: @retroactive Error {}
+
 extension LiveKit {
-    public func status(_ req: Request) async throws -> HTTPStatus {
+    public func status(_ client: HTTPClient = .shared) async throws -> HTTPResponseStatus {
         let prePostURL: URL = baseTwirpURL.deletingLastPathComponent()
         let postURL: URL = prePostURL.appendingPathComponent("livekit")
-        let someURI = URI(string: postURL.absoluteString)
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(["":""])
-        }
+        
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
     
@@ -26,145 +31,151 @@ extension LiveKit {
         roomName: String,
         timeout: Int = 300,
         maxParticipants: Int = 10,
-        on req: Request
+        client: HTTPClient = .shared
     ) async throws -> Room {
         let roomCreate = Room.Create(name: roomName, timeout: timeout, maxParticipants: maxParticipants)
-        return try await createRoom(roomCreate, on: req)
+        return try await createRoom(roomCreate, client: client)
     }
     
     public func createRoom(
         _ roomCreate: Room.Create,
-        on req: Request
+        client: HTTPClient = .shared
     ) async throws -> Room {
         let postURL: URL = baseTwirpURL.appendingPathComponent("CreateRoom")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken()
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(roomCreate)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        let token = try await generateRoomToken()
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(roomCreate)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         guard response.status == .ok else {
-            throw Abort(.custom(code: response.status.code, reasonPhrase: response.status.reasonPhrase))
+            throw response.status
         }
-        let room = try response.content.decode(Room.self)
+        let contentLength = Int(response.headers.first(name: "content-length") ?? "") ?? 1024 * 1024
+        let body = try await response.body.collect(upTo: contentLength)
+        let room = try JSONDecoder().decode(Room.self, from: body)
         return room
     }
     
-    public func getAllRooms(on req: Request) async throws -> Room.Rooms {
+    public func getAllRooms(client: HTTPClient = .shared) async throws -> Room.Rooms {
         let postURL: URL = baseTwirpURL.appendingPathComponent("ListRooms")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken()
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(["":""])
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        let token = try await generateRoomToken()
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         guard response.status == .ok else {
-            throw Abort(.custom(code: response.status.code, reasonPhrase: response.status.reasonPhrase))
+            throw response.status
         }
-        let rooms = try response.content.decode(Room.Rooms.self)
+        let contentLength = Int(response.headers.first(name: "content-length") ?? "") ?? 1024 * 1024
+        let body = try await response.body.collect(upTo: contentLength)
+        let rooms = try JSONDecoder().decode(Room.Rooms.self, from: body)
         return rooms
     }
     
-    public func deleteRoom(_ roomName: String, on req: Request) async throws -> HTTPStatus {
+    public func deleteRoom(_ roomName: String, client: HTTPClient = .shared) async throws -> HTTPResponseStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("DeleteRoom")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken()
+        let token = try await generateRoomToken()
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
         let deleteRoom = Room.Details(roomName: roomName)
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(deleteRoom)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        let data = try JSONEncoder().encode(deleteRoom)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
     
-    public func updateRoomMetadata(_ roomName: String, metadata: String, on req: Request) async throws -> HTTPStatus {
+    public func updateRoomMetadata(_ roomName: String, metadata: String, client: HTTPClient = .shared) async throws -> HTTPResponseStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("UpdateRoomMetadata")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(roomName)
+        let token = try await generateRoomToken(roomName)
         let room = Room.Details(roomName: roomName, metadata: metadata)
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(room)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(room)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
     
-    public func sendData(_ sendData: Room.SendData, on req: Request) async throws -> HTTPStatus {
+    public func sendData(_ sendData: Room.SendData, client: HTTPClient = .shared) async throws -> HTTPResponseStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("SendData")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(sendData.roomName)
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(sendData)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        let token = try await generateRoomToken(sendData.roomName)
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(sendData)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
     
-    public func getAllParticipants(_ roomName: String, on req: Request) async throws -> ParticipantInfo.Participants {
+    public func getAllParticipants(_ roomName: String, client: HTTPClient = .shared) async throws -> ParticipantInfo.Participants {
         let postURL: URL = baseTwirpURL.appendingPathComponent("ListParticipants")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(roomName)
+        let token = try await generateRoomToken(roomName)
         let room = Room.Details(roomName: roomName)
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(room)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(room)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         guard response.status == .ok else {
-            throw Abort(.custom(code: response.status.code, reasonPhrase: response.status.reasonPhrase))
+            throw response.status
         }
-        let participants = try response.content.decode(ParticipantInfo.Participants.self)
+        let contentLength = Int(response.headers.first(name: "content-length") ?? "") ?? 1024 * 1024
+        let body = try await response.body.collect(upTo: contentLength)
+        let participants = try JSONDecoder().decode(ParticipantInfo.Participants.self, from: body)
         return participants
     }
     
-    public func getParticipant(_ roomName: String, participantID: String, on req: Request) async throws -> ParticipantInfo {
+    public func getParticipant(_ roomName: String, participantID: String, client: HTTPClient = .shared) async throws -> ParticipantInfo {
         let postURL: URL = baseTwirpURL.appendingPathComponent("GetParticipant")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(roomName)
+        let token = try await generateRoomToken(roomName)
         let room = Room.Details(roomName: roomName, participantID: participantID)
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(room)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(room)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         guard response.status == .ok else {
-            throw Abort(.custom(code: response.status.code, reasonPhrase: response.status.reasonPhrase))
+            throw response.status
         }
-        let participant = try response.content.decode(ParticipantInfo.self)
+        let contentLength = Int(response.headers.first(name: "content-length") ?? "") ?? 1024 * 1024
+        let body = try await response.body.collect(upTo: contentLength)
+        let participant = try JSONDecoder().decode(ParticipantInfo.self, from: body)
         return participant
     }
     
-    public func removeParticipant(_ roomName: String, participantID: String, on req: Request) async throws -> HTTPStatus {
+    public func removeParticipant(_ roomName: String, participantID: String, client: HTTPClient = .shared) async throws -> HTTPResponseStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("RemoveParticipant")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(roomName)
+        let token = try await generateRoomToken(roomName)
         let room = Room.Details(roomName: roomName, participantID: participantID)
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(room)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(room)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
     
@@ -173,24 +184,24 @@ extension LiveKit {
         participantID: String,
         trackSID: String,
         isMuted: Bool,
-        on req: Request
-    ) async throws -> HTTPStatus {
+        client: HTTPClient = .shared
+    ) async throws -> HTTPResponseStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("MutePublishedTrack")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(roomName)
+        let token = try await generateRoomToken(roomName)
         let room = Room.Details(
             roomName: roomName,
             participantID: participantID,
             trackSID: trackSID,
             isMuted: isMuted
         )
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(room)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(room)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
     
@@ -199,24 +210,24 @@ extension LiveKit {
         participantID: String,
         metadata: String? = nil,
         permissions: ParticipantInfo.Permission,
-        on req: Request
-    ) async throws -> HTTPStatus {
+        client: HTTPClient = .shared
+    ) async throws -> HTTPResponseStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("UpdateParticipant")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(roomName)
+        let token = try await generateRoomToken(roomName)
         let room = Room.Details(
             roomName: roomName,
             participantID: participantID,
             participantPermissions: permissions,
             metadata: metadata
         )
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(room)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(room)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
     
@@ -225,24 +236,24 @@ extension LiveKit {
         participantID: String,
         trackSIDs: [String],
         subscribe: Bool,
-        on req: Request
-    ) async throws -> HTTPStatus {
+        client: HTTPClient = .shared
+    ) async throws -> HTTPResponseStatus {
         let postURL: URL = baseTwirpURL.appendingPathComponent("UpdateSubscriptions")
-        let someURI = URI(string: postURL.absoluteString)
-        let token = try generateRoomToken(roomName)
+        let token = try await generateRoomToken(roomName)
         let room = Room.Details(
             roomName: roomName,
             participantID: participantID,
             trackSIDs: trackSIDs,
             subscribe: subscribe
         )
-        let response = try await req.client.post(someURI) { req in
-            req.headers.contentType = .json
-            try req.content.encode(room)
-            
-            let auth = BearerAuthorization(token: token)
-            req.headers.bearerAuthorization = auth
-        }
+        var request = HTTPClientRequest(url: postURL.absoluteString)
+        request.method = .POST
+        request.headers.add(name: "content-type", value: "application/json")
+        request.headers.add(name: "Authorization", value: "Bearer \(token)")
+        let data = try JSONEncoder().encode(room)
+        request.body = .bytes(data)
+        
+        let response = try await client.execute(request, timeout: .seconds(30))
         return response.status
     }
 }

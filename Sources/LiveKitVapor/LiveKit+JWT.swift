@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import JWT
+import JWTKit
 
 extension LiveKit {
     public func generateToken(
@@ -15,8 +15,7 @@ extension LiveKit {
         expiryDate: Date = Date(timeIntervalSinceNow: 5 * 60),
         videoGrant: VideoGrant = VideoGrant(roomName: "myRoom", canJoinRoom: true),
         metadata: String? = nil
-    ) throws -> String {
-        let jwtSigner: JWTSigner = .hs256(key: secret)
+    ) async throws -> String {
         let date: Date = Date()
         let notBefore = Date(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate.rounded(.up))
         let notBeforeClaim = NotBeforeClaim(value: notBefore)
@@ -32,12 +31,11 @@ extension LiveKit {
             videoGrant: videoGrant,
             metadata: metadata
         )
-        let token = try jwtSigner.sign(payload)
+        let token = try await jwtKeyCollection.sign(payload)
         return token
     }
     
-    internal func generateRoomToken(_ roomName: String = "") throws -> String {
-        let jwtSigner: JWTSigner = .hs256(key: secret)
+    internal func generateRoomToken(_ roomName: String = "") async throws -> String {
         let videoGrant: VideoGrant = VideoGrant(
             roomName: roomName,
             canCreateRoom: true,
@@ -61,7 +59,7 @@ extension LiveKit {
             videoGrant: videoGrant,
             metadata: "I am the your helper on the server side."
         )
-        let token = try jwtSigner.sign(payload)
+        let token = try await jwtKeyCollection.sign(payload)
         return token
     }
 }

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import JWT
+import JWTKit
 
 struct LKJTWPayload: JWTPayload {
     enum CodingKeys: String, CodingKey {
@@ -40,7 +40,7 @@ struct LKJTWPayload: JWTPayload {
     /// Participant metadata
     var metadata: String? = nil
     
-    func verify(using signer: JWTSigner) throws {
+    func verify(using algorithm: some JWTKit.JWTAlgorithm) async throws {
         try self.expiration.verifyNotExpired()
     }
 }

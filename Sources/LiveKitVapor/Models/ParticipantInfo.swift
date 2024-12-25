@@ -6,9 +6,8 @@
 //
 
 import Foundation
-import Vapor
 
-public struct ParticipantInfo: Codable, Content, Equatable {
+public struct ParticipantInfo: Codable, Equatable, Sendable {
     enum CodingKeys: String, CodingKey {
         case sid = "sid"
         case participantID = "identity"
@@ -47,7 +46,7 @@ public struct ParticipantInfo: Codable, Content, Equatable {
 }
 
 extension ParticipantInfo {
-    public struct Permission: Codable, Equatable {
+    public struct Permission: Codable, Equatable, Sendable {
         public init(
             canSubscribe: Bool,
             canPublishTracks: Bool,
@@ -86,8 +85,7 @@ extension ParticipantInfo {
 }
 
 extension ParticipantInfo {
-    public struct Participants: Codable, Content {
+    public struct Participants: Codable, Sendable {
         public var participants: [ParticipantInfo]
     }
 }
-

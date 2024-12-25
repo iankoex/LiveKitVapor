@@ -5,7 +5,9 @@
 //  Created by Ian on 08/08/2022.
 //
 
-public struct VideoGrant: Codable {
+import Foundation
+
+public struct VideoGrant: Codable, Sendable {
     public init(
         roomName: String,
         canCreateRoom: Bool? = nil,
