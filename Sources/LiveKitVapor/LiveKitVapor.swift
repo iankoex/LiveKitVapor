@@ -6,29 +6,26 @@ import NIOFoundationCompat
 
 final public class LiveKit: Sendable {    
     let apiKey: String
-    let secret: String
     let baseTwirpURL: URL
     let jwtKeyCollection: JWTKeyCollection
     
     /// Helpers For LiveKit on Swift on the Server
     ///
     /// - parameters:
-    ///    - apiKey: Your API Key
-    ///    - secret: Your Secret
+    ///    - apiKey: Your LiveKit Key
     ///    - baseTwirpURL: Twirp URL such as http://localhost:7880/twirp/livekit.RoomService
     ///    - jwtKeyCollection: JWTKeyCollection
     ///
     ///  initialize jwtKeyCollection this way
-    ///  let collection = await JWTKeyCollection().addHS256(key: "mySecretKey")
+    ///  let collection = await JWTKeyCollection()
+    ///  await collection.add(hmac: "live-kit-secret", digestAlgorithm: .sha256)
     ///
-    init(
+    public init(
         apiKey: String,
-        secret: String,
-        baseTwirpURL: URL,
+        baseTwirpURL: URL = URL(string: "http://localhost:7880/twirp/livekit.RoomService")!,
         jwtKeyCollection: JWTKeyCollection
     ) {
         self.apiKey = apiKey
-        self.secret = secret
         self.baseTwirpURL = baseTwirpURL
         self.jwtKeyCollection = jwtKeyCollection
     }
