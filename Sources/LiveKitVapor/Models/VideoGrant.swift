@@ -37,34 +37,34 @@ public struct VideoGrant: Codable, Sendable {
     public var roomName: String
     
     /// Permission to create rooms
-    public var canCreateRoom: Bool? = nil
+    public var canCreateRoom: Bool?
     
     /// Permission to list available rooms
-    public var canListRooms: Bool? = nil
+    public var canListRooms: Bool?
     
     /// Permission to join a room
-    public var canJoinRoom: Bool? = nil
+    public var canJoinRoom: Bool?
     
     /// Permission to moderate a room
-    public var isRoomAdmin: Bool? = nil
+    public var isRoomAdmin: Bool?
     
     /// Permissions to use Egress service
-    public var canRecordRoom: Bool? = nil
+    public var canRecordRoom: Bool?
     
     /// Allow participant to publish tracks
-    public var canPublish: Bool? = nil
+    public var canPublish: Bool?
     
     /// Allow participant to publish data to the room
-    public var canPublishData: Bool? = nil
+    public var canPublishData: Bool?
     
     /// Allow participant to subscribe to tracks
-    public var canSubscribe: Bool = true
+    public var canSubscribe: Bool
     
     /// Hide participant from others (used by recorder)
-    public var isParticipantHidden: Bool? = nil
+    public var isParticipantHidden: Bool?
     
     /// Indicates this participant is recording the room
-    public var isRecorder: Bool? = nil
+    public var isRecorder: Bool?
     
     enum CodingKeys: String, CodingKey {
         case roomName = "room"
