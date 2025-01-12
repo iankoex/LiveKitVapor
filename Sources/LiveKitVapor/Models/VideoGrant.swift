@@ -27,6 +27,7 @@ public struct VideoGrant: Codable, Sendable {
         self.canJoinRoom = canJoinRoom
         self.isRoomAdmin = isRoomAdmin
         self.canRecordRoom = canRecordRoom
+        self.canPublish = canPublish
         self.canPublishData = canPublishData
         self.canSubscribe = canSubscribe
         self.isParticipantHidden = isParticipantHidden
