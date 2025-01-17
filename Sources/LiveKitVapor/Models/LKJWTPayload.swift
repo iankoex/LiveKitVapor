@@ -17,6 +17,7 @@ struct LKJTWPayload: JWTPayload {
         case apiKey = "iss"
         case videoGrant = "video"
         case metadata = "metadata"
+        case attributes = "attributes"
     }
     
     /// Expiration time of token
@@ -39,6 +40,9 @@ struct LKJTWPayload: JWTPayload {
  
     /// Participant metadata
     var metadata: String? = nil
+    
+    /// Participant attributes (key/value pairs of strings)
+    var attributes: [String: String]
     
     func verify(using algorithm: some JWTKit.JWTAlgorithm) async throws {
         try self.expiration.verifyNotExpired()

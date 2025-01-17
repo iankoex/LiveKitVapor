@@ -14,7 +14,8 @@ extension LiveKit {
         participantName: String = "Server Helper",
         expiryDate: Date = Date(timeIntervalSinceNow: 5 * 60),
         videoGrant: VideoGrant = VideoGrant(roomName: "myRoom", canJoinRoom: true),
-        metadata: String? = nil
+        metadata: String? = nil,
+        attributes: [String: String] = [:]
     ) async throws -> String {
         let date: Date = Date()
         let notBefore = Date(timeIntervalSinceReferenceDate: date.timeIntervalSinceReferenceDate.rounded(.up))
@@ -29,7 +30,8 @@ extension LiveKit {
             participantID: participantID,
             participantName: participantName,
             videoGrant: videoGrant,
-            metadata: metadata
+            metadata: metadata,
+            attributes: attributes
         )
         let token = try await jwtKeyCollection.sign(payload)
         return token
@@ -57,7 +59,8 @@ extension LiveKit {
             participantID: UUID().uuidString,
             participantName: "Server Helper",
             videoGrant: videoGrant,
-            metadata: "I am the your helper on the server side."
+            metadata: "I am the your helper on the server side.",
+            attributes: [:]
         )
         let token = try await jwtKeyCollection.sign(payload)
         return token
